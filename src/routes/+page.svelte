@@ -29,6 +29,16 @@
         }
     }
 
+    async function updateCardStatus(id: number, newStatus: string) {
+        try {
+            const updatedCard = await cardService.update(id, { status: newStatus });
+            cards = cards.map(c => c.id === id ? updatedCard : c);
+        } catch (err) {
+            error = err instanceof Error ? err.message : 'Failed to update card status';
+            await fetchCards();
+        }
+    }
+
     async function deleteCard(id: number) {
         try {
             await cardService.delete(id);
@@ -53,7 +63,6 @@
     {#if isLoading}
         <p>Loading...</p>
     {:else}
-        <!-- Individual Cards View (Above) -->
         <section class="cards-section">
             <h2>All Cards</h2>
             <div class="cards-grid">
@@ -65,14 +74,9 @@
             </div>
         </section>
 
-        <!-- Column View (Below) -->
         <section class="board-section">
             <h2>Kanban Board</h2>
-            <ul class="board">
-                <ColumnComponent title="To Do" status="todo" {cards} />
-                <ColumnComponent title="Doing" status="doing" {cards} />
-                <ColumnComponent title="Done" status="done" {cards} />
-            </ul>
+            <ColumnComponent {cards} onUpdateStatus={updateCardStatus} />
         </section>
     {/if}
 </div>
@@ -113,14 +117,6 @@
         margin-top: 2rem;
     }
 
-    .board {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        gap: 1.5rem;
-    }
-
     .error {
         color: #c33;
         background: #fee;
@@ -132,10 +128,6 @@
     @media (max-width: 968px) {
         .cards-grid {
             grid-template-columns: 1fr;
-        }
-
-        .board {
-            flex-direction: column;
         }
     }
 </style>
