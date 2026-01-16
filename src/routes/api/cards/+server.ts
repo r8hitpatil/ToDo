@@ -1,5 +1,5 @@
 import prisma from "$lib/prisma";
-import type { CardResponse } from "$lib/types/api.types";
+import type { CardResponse, CardsResponse } from "$lib/types/api.types";
 import { createCardSchema } from "$lib/validators/cards.validators";
 import { json, type RequestHandler } from "@sveltejs/kit";
 
@@ -33,7 +33,12 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     });
 
-    return json(cards);
+    const response:CardsResponse = {
+      data: cards,
+      count: cards.length
+    }
+
+    return json(response);
   } catch (err) {
     return json(
       { error: 'Failed to fetch cards' },
