@@ -1,38 +1,220 @@
-# sv
+# Todo Kanban Board
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A full-stack todo application with drag-and-drop Kanban board interface, built with SvelteKit, TypeScript, Prisma, and PostgreSQL.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **Kanban Board UI** - Drag and drop cards between Todo, Doing, and Done columns
+- **CRUD Operations** - Create, read, update, and delete cards via REST APIs
+- **Modal Interface** - Clean modal for creating new tasks
+- **Inline Editing** - Edit cards directly in place with emoji status indicators
+- **PostgreSQL Database** - Persistent storage with Prisma ORM
+- **Type-Safe** - Full TypeScript implementation with Zod validation
 
-```sh
-# create a new project in the current directory
-npx sv create
+## Tech Stack
 
-# create a new project in my-app
-npx sv create my-app
+- **Frontend**: SvelteKit, TypeScript
+- **Backend**: SvelteKit API Routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Validation**: Zod
+- **Containerization**: Docker & Docker Compose
+
+## Prerequisites
+
+- Node.js 18+ and npm/pnpm/yarn
+- Docker and Docker Compose (for containerized setup)
+- PostgreSQL (for local development without Docker)
+
+## Getting Started
+
+### Option 1: Docker (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd todo-kanban-board
+   ```
+
+2. **Copy the example environment variable file**
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Start the development server**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Install dependencies
+   ```bash
+   docker-compose exec app npm install
+   ```
+
+5. **Run the development server**
+   ```bash
+   docker-compose exec app npm run dev
+   ```
+
+6. **Open your browser** and navigate to `http://localhost:5173`
+
+### Option 2: Local (Without Docker)
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd todo-kanban-board
+   ```
+
+2. **Copy the example environment variable file**
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser** and navigate to `http://localhost:5173`
+
+## Database Setup
+
+### Using Docker (Recommended)
+
+The recommended way to run the database is through the provided Docker setup.
+
+1. Ensure Docker and Docker Compose are installed.
+2. In the project root, run:
+   ```bash
+   docker-compose up -d db
+   ```
+3. The database will be available at `postgres://user:password@localhost:5432/dbname`.
+
+### Without Docker
+
+1. Install PostgreSQL locally.
+2. Create a new database and user as specified in your `.env` file.
+3. Run the Prisma migration to set up the database schema:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+## API ENDPOINTS
+
+### GET /api/cards
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Task title",
+      "description": "Optional description",
+      "status": "todo",
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "updatedAt": "2026-01-15T10:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
 ```
 
-## Developing
+### POST /api/cards
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+**Request Body:**
 
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```json
+{
+  "title": "New task",
+  "description": "Optional description",
+  "status": "todo"
+}
 ```
 
-## Building
+**Response:**
 
-To create a production version of your app:
-
-```sh
-npm run build
+```json
+{
+  "data": {
+    "id": 1,
+    "title": "New task",
+    "description": "Optional description",
+    "status": "todo",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  "message": "Card create successfully"
+}
 ```
 
-You can preview the production build with `npm run preview`.
+### PATCH /api/cards/:id
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+**Request Body:**
+
+```json
+{
+  "title": "Updated title",
+  "description": "Updated description",
+  "status": "doing"
+}
+```
+
+**Response:**
+
+```json
+{
+  "data": { /* updated card */ },
+  "success": true,
+  "message": "Card updated successfully"
+}
+```
+
+### DELETE /api/cards/:id
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Card deleted successfully"
+}
+```
+
+## PROJECT STRUCTURE
+
+```
+todo/
+├── src/
+│   ├── lib/
+│   │   ├── components/
+│   │   │   ├── CardComponent.svelte      # Individual card with inline edit
+│   │   │   ├── ColumnComponent.svelte    # Kanban column with drag-drop
+│   │   │   └── CreateCardComponent.svelte # Modal for creating cards
+│   │   ├── services/
+│   │   │   ├── cardService.ts            # API service layer
+│   │   │   └── dnd.ts                    # Drag and drop utilities
+│   │   ├── types/
+│   │   │   └── api.types.ts              # TypeScript types
+│   │   ├── validators/
+│   │   │   └── cards.validators.ts       # Zod validation schemas
+│   │   └── prisma.ts                     # Prisma client
+│   ├── routes/
+│   │   ├── api/
+│   │   │   └── cards/
+│   │   │       ├── +server.ts            # GET, POST endpoints
+│   │   │       └── [id]/+server.ts       # GET, PATCH, DELETE by ID
+│   │   └── +page.svelte                  # Main Kanban board page
+│   └── app.html
+├── prisma/
+│   ├── schema.prisma                     # Database schema
+│   └── migrations/                       # Database migrations
+├── docker-compose.yml
+├── Dockerfile
+└── README.md
+```
