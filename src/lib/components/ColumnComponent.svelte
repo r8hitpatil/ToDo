@@ -6,9 +6,9 @@
     export let onUpdateStatus: (cardId: number, newStatus: string) => void;
 
     const columns = [
-        { status: 'todo', label: '📫 Todo' },
-        { status: 'doing', label: '🔄 Doing' },
-        { status: 'done', label: '✅ Done' }
+        { status: 'todo', label: 'Todo' },
+        { status: 'doing', label: 'Doing' },
+        { status: 'done', label: 'Done' }
     ];
 
     function handleDrop(column: { status: string }, cardId: string) {
